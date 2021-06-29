@@ -15,10 +15,6 @@ to run for years while being in sleep. There will also be functions included whi
 /**
  * issues: 'n' of ten needs to be resoldered
  *
- *          twenty - one of the leds is backwards
- *          three hour - fluttering...why.
- *          eight -fluttering
- *          twelve hour - fluttering
  *
  *          design - the extra LEDS in the back shine to the front.. they should be placed in an inconspicuous spot, or under letters that
  *          are going to be covered by something. gaaahhhhh
@@ -31,47 +27,83 @@ to run for years while being in sleep. There will also be functions included whi
 #include "PCF8523_RTC.h"
 
 #define ROUND_TO_NEXT_HOUR -1
+#define INTERRUPT_PIN 3
 
 
 #define GLOW_FRAMES  500
+#define CONFIG_GLOW_FRAMES 50
 
 
 void setup() {
   Wire.begin();
   Wire.setClock(400000);
   MCP23008_reset_all_pins();
-  setPCF8523(7,12);
-  pinMode(3, INPUT);                                      
-  attachInterrupt(digitalPinToInterrupt(3),buttonPressed1,RISING); 
-
+  setPCF8523(12,00);
+  pinMode(INTERRUPT_PIN, INPUT);                                      
+  attachInterrupt(digitalPinToInterrupt(INTERRUPT_PIN),buttonPressed,RISING); 
+  readRTC();
+  goToSleep();
 }
 
 void loop() {
-  goToSleep();
+ //wake up
+ detachInterrupt(digitalPinToInterrupt(INTERRUPT_PIN)); //detach interrupt so that we don't cause an interrupt storm
+ 
+ delay(300); 
+ 
+ if(digitalRead(4) == LOW){// if ater 300 ms the button has been released then just show the time 
+    readRTC();
+    showTime(currentHours,currentMinutes, GLOW_FRAMES); //show the currentTime
 
-
-}
-
-void buttonPressed1(){
-  //showTime(10,5);
-  int i=0;
-  while(i!= 500){
-  five_Minutes(i++);
+ }else if(digitalRead(4) == HIGH){ //if the button has been pressed for more than 300 ms then get ready to change the time
+    boolean timeConfig = true; 
+    readRTC(); //read the time
+    
+    currentMinutes = roundMin(currentMinutes); //convert from the precice time told by the RTC to a time the watch can display
+    while(timeConfig){
+      showTime(currentHours, currentMinutes, CONFIG_GLOW_FRAMES); //flash the time
+      if(digitalRead(4) == HIGH){
+        delay(100);
+        if(digitalRead(4) == HIGH){ //button held down for more than 100 ms, therefore we exit time configuration
+          timeConfig = false;
+          break;
+        }else if (digitalRead(4) == LOW){ //increment the time by 5 minutes
+          currentMinutes = roundMin(currentMinutes +5);
+          if(currentMinutes == -1){
+            currentMinutes = 0;
+            currentHours+=1;
+            if(currentHours >12){
+              five_Minutes(0);
+              currentHours = 1; //roll over the hours
+            }
+        }
+          setPCF8523(currentHours,currentMinutes);
+      }
+    }
   }
 }
+ attachInterrupt(digitalPinToInterrupt(INTERRUPT_PIN),buttonPressed,RISING); 
+ goToSleep();
+}
+void buttonPressed(){
+  //wake up and go through a single loop
+
+  
+}
+
 
 /*validates all hour:minute combinations, including indications such as 'it', 'is', 'past' and 'to'*/
 void testAllTime(){
   for(int h = 1; h<=12; h++){
     for(int m = 0; m<60; m++){
-      showTime(h,m);
+      showTime(h,m, GLOW_FRAMES);
     }
 
 }
 
 }
 
-void showTime(int h, int m){
+void showTime(int h, int m, int showPeriod){
 
   /*pointers to minutes and hours functions*/
   void (*min_ptr)(int);
@@ -102,14 +134,14 @@ void showTime(int h, int m){
     }
 
   if(min_ptr == NULL){
-    for(int i = 0; i<GLOW_FRAMES; i++){
+    for(int i = 0; i<showPeriod; i++){
       it_is(i);
       (*hour_ptr)(i);
       (*indicator_ptr)(i);
     }
    } else {
       //when minutes != 0 use this loop
-      for(int i = 0; i<GLOW_FRAMES; i++){
+      for(int i = 0; i<showPeriod; i++){
         it_is(i);
         (*hour_ptr)(i);
         (*min_ptr)(i);
@@ -150,6 +182,10 @@ void goToSleep(){
 
 }
 
+void wakeUp(){
+
+}
+
 
 int roundMin(int m){
   //rounds minutes to the closest 5 minute denomination
@@ -170,6 +206,8 @@ int roundMin(int m){
 int getAddrOfHourFunction(int hour){
   int addrOfHourFunction;
 
+  hour = ((hour-1)%12)+1;
+  
   switch(hour){
     case 1:
       addrOfHourFunction = &one_hour;
