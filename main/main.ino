@@ -15,7 +15,7 @@ to run for years while being in sleep. There will also be functions included whi
 /**
  * issues: 'n' of ten needs to be resoldered
  *
- *
+ *          -twenty causes an extra LED under it to turn on 
  *          design - the extra LEDS in the back shine to the front.. they should be placed in an inconspicuous spot, or under letters that
  *          are going to be covered by something. gaaahhhhh
  *
@@ -28,10 +28,11 @@ to run for years while being in sleep. There will also be functions included whi
 
 #define ROUND_TO_NEXT_HOUR -1
 #define INTERRUPT_PIN 3
+#define BUTTON_PIN    4  //PD4; active low 
 
 
 #define GLOW_FRAMES  500
-#define CONFIG_GLOW_FRAMES 50
+#define CONFIG_GLOW_FRAMES 100
 
 
 void setup() {
@@ -49,35 +50,43 @@ void loop() {
  //wake up
  detachInterrupt(digitalPinToInterrupt(INTERRUPT_PIN)); //detach interrupt so that we don't cause an interrupt storm
  
- delay(300); 
- 
- if(digitalRead(4) == LOW){// if ater 300 ms the button has been released then just show the time 
+ /*find out how long the button has been clicked down for*/
+ int delayTime = millis();
+ while(digitalRead(BUTTON_PIN) == HIGH);
+ delayTime = millis() - delayTime;
+
+ if(delayTime <300){// if the button has been clicked for less than 300 ms
     readRTC();
     showTime(currentHours,currentMinutes, GLOW_FRAMES); //show the currentTime
-
- }else if(digitalRead(4) == HIGH){ //if the button has been pressed for more than 300 ms then get ready to change the time
+ }
+ else if(delayTime >=300){ //if the button has been pressed for more than 300 ms then get ready to change the time
     boolean timeConfig = true; 
     readRTC(); //read the time
     
     currentMinutes = roundMin(currentMinutes); //convert from the precice time told by the RTC to a time the watch can display
     while(timeConfig){
       showTime(currentHours, currentMinutes, CONFIG_GLOW_FRAMES); //flash the time
-      if(digitalRead(4) == HIGH){
-        delay(100);
-        if(digitalRead(4) == HIGH){ //button held down for more than 100 ms, therefore we exit time configuration
+      if(digitalRead(BUTTON_PIN) == HIGH){
+        
+        /*figure out how long the button is held down for*/
+        delayTime = millis();
+        while(digitalRead(BUTTON_PIN) == HIGH); 
+        delayTime = millis() - delayTime;
+        
+        if(delayTime > 100){ //button held down for more than 100 ms, therefore we exit time configuration
           timeConfig = false;
           break;
-        }else if (digitalRead(4) == LOW){ //increment the time by 5 minutes
+        }
+        else if (delayTime <= 100){ //increment the time by 5 minutes
           currentMinutes = roundMin(currentMinutes +5);
-          if(currentMinutes == -1){
+          if(currentMinutes == -1){ //roundMin() returns -1 when minutes has reached 60, otherwise rounds the mins to closest 5 minutes
             currentMinutes = 0;
-            currentHours+=1;
+            currentHours++;
             if(currentHours >12){
-              five_Minutes(0);
               currentHours = 1; //roll over the hours
             }
         }
-          setPCF8523(currentHours,currentMinutes);
+          setPCF8523(currentHours,currentMinutes); //set the new time.
       }
     }
   }
