@@ -27,17 +27,31 @@ to run for years while being in sleep. There will also be functions included whi
 #include "PCF8523_RTC.h"
 
 #define ROUND_TO_NEXT_HOUR -1
-#define INTERRUPT_PIN 3
-#define BUTTON_PIN    4  //PD4; active low 
+#define INTERRUPT_PIN       3
+#define BUTTON_PIN          4  //PD4; active low 
 
 
 #define GLOW_FRAMES  500
 #define CONFIG_GLOW_FRAMES 100
+#define SHOWOFF_GLOW_FRAMES 10
 
+#define NUMBER_OF_TIME_FUNCTIONS 22
+#define DELAY_BETWEEN_SHOWOFF 1
+
+boolean showOff = true; //true when we are in showOff mode and false otherwise
+int showOffInterval; //how many intervals of 8s do we wait before showing off again?
+void (*showOff_ptrs[5])(int);
+
+void (*time_ptrs[NUMBER_OF_TIME_FUNCTIONS])(int) = {
+  one_hour, two_hour, three_hour, four_hour, five_hour, six_hour, seven_hour, eight_hour, nine_hour, ten_hour, eleven_hour, twelve_hour,
+  five_Minutes, ten_Minutes, fifteen_Minutes, twenty_Minutes, twentyFive_Minutes, thirty_Minutes,
+  past, to, it_is, oclock
+   
+};
 
 void setup() {
   Wire.begin();
-  Wire.setClock(400000);
+  Wire.setClock(400000); //set spi speed to 400 khz
   MCP23008_reset_all_pins();
   setPCF8523(12,00);
   pinMode(INTERRUPT_PIN, INPUT);                                      
@@ -49,6 +63,29 @@ void setup() {
 void loop() {
  //wake up
  detachInterrupt(digitalPinToInterrupt(INTERRUPT_PIN)); //detach interrupt so that we don't cause an interrupt storm
+  enableShowOffMode();
+ //showOffModeEnabled
+ if(showOff){
+  if(showOffInterval <= 0){
+    for(int i=0; i <5 ; i++){
+      (*showOff_ptrs[i])(i);
+      delay(SHOWOFF_GLOW_FRAMES);
+      MCP23008_reset_all_pins();
+      set_IndicatorPins_INPUT();
+      set_MinPins_INPUT();
+    }
+  }
+  else 
+    showOffInterval--;
+  
+ }
+ else
+  disableShowOffMode();
+ 
+ disableShowOffMode();
+ showOff= false;
+ return; 
+
  
  /*find out how long the button has been clicked down for*/
  int delayTime = millis();
@@ -59,8 +96,36 @@ void loop() {
     readRTC();
     showTime(currentHours,currentMinutes, GLOW_FRAMES); //show the currentTime
  }
- else if(delayTime >=300){ //if the button has been pressed for more than 300 ms then get ready to change the time
-    boolean timeConfig = true; 
+ else if(delayTime >=300 && delayTime <2000){ //if the button has been pressed for more than 300 ms then get ready to change the time
+    configureTime();
+ }
+ else if(delayTime >= 2000){ //change to showoff mode
+    enableShowOffMode();
+ }
+ attachInterrupt(digitalPinToInterrupt(INTERRUPT_PIN),buttonPressed,RISING); 
+ goToSleep();
+}
+
+void disableShowOffMode(){
+  WDTCSR &= ~(1<<6);//disable interrupt mode
+}
+
+void enableShowOffMode(){
+  //SETUP WATCHDOG TIMER
+  WDTCSR = (24);//change enable and WDE - also resets
+  WDTCSR = (33);//set the WDT to 8 seconds - get rid of the WDE and WDCE bit
+  WDTCSR |= (1<<6);//enable interrupt mode
+  //showOff = true;
+  showOffInterval = random(DELAY_BETWEEN_SHOWOFF); // maximum time between showing is 5 minutes (37 * 8s ~= 300s)
+
+  for(int i=0; i<5; i++)
+    showOff_ptrs[i] = time_ptrs[random(NUMBER_OF_TIME_FUNCTIONS)];
+  
+}
+
+void configureTime(){
+  int delayTime;
+  boolean timeConfig = true; 
     readRTC(); //read the time
     
     currentMinutes = roundMin(currentMinutes); //convert from the precice time told by the RTC to a time the watch can display
@@ -90,14 +155,11 @@ void loop() {
       }
     }
   }
-}
- attachInterrupt(digitalPinToInterrupt(INTERRUPT_PIN),buttonPressed,RISING); 
- goToSleep();
-}
-void buttonPressed(){
-  //wake up and go through a single loop
-
   
+}
+
+void buttonPressed(){
+  //wake up and go through 'loop()' once
 }
 
 
