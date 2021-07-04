@@ -1,3 +1,4 @@
+
 /*
 Title: main
 Creator: Arsalan Syed
@@ -36,10 +37,10 @@ to run for years while being in sleep. There will also be functions included whi
 #define SHOWOFF_GLOW_FRAMES 10
 
 #define NUMBER_OF_TIME_FUNCTIONS 22
-#define DELAY_BETWEEN_SHOWOFF 1
+#define DELAY_BETWEEN_SHOWOFF 10
 
-boolean showOff = true; //true when we are in showOff mode and false otherwise
-int showOffInterval; //how many intervals of 8s do we wait before showing off again?
+boolean showOff = false; //true when we are in showOff mode and false otherwise
+int showOffInterval = 0; //how many intervals of 8s do we wait before showing off again?
 void (*showOff_ptrs[5])(int);
 
 void (*time_ptrs[NUMBER_OF_TIME_FUNCTIONS])(int) = {
@@ -54,7 +55,8 @@ void setup() {
   Wire.setClock(400000); //set spi speed to 400 khz
   MCP23008_reset_all_pins();
   setPCF8523(12,00);
-  pinMode(INTERRUPT_PIN, INPUT);                                      
+  pinMode(INTERRUPT_PIN, INPUT);   
+  pinMode(BUTTON_PIN, INPUT);                                   
   attachInterrupt(digitalPinToInterrupt(INTERRUPT_PIN),buttonPressed,RISING); 
   readRTC();
   goToSleep();
@@ -62,61 +64,73 @@ void setup() {
 
 void loop() {
  //wake up
- detachInterrupt(digitalPinToInterrupt(INTERRUPT_PIN)); //detach interrupt so that we don't cause an interrupt storm
-  enableShowOffMode();
- //showOffModeEnabled
- if(showOff){
-  if(showOffInterval <= 0){
-    for(int i=0; i <5 ; i++){
-      (*showOff_ptrs[i])(i);
-      delay(SHOWOFF_GLOW_FRAMES);
-      MCP23008_reset_all_pins();
-      set_IndicatorPins_INPUT();
-      set_MinPins_INPUT();
-    }
-  }
-  else 
-    showOffInterval--;
-  
- }
- else
-  disableShowOffMode();
- 
- disableShowOffMode();
- showOff= false;
- return; 
 
+ detachInterrupt(digitalPinToInterrupt(INTERRUPT_PIN)); //detach interrupt so that we don't cause an interrupt storm
+ 
+ //if showOff mode is on, we don't want the WDT to interrupt us while we're looking at the time, so disable WDT interrupts for now
+ if(digitalRead(BUTTON_PIN) == HIGH){
+  if(showOff)
+    WDTCSR &= ~(1<<6);//disable WDT interrupt mode 
+ }
+ else { //the interrupt was not caused by the button
+  if(showOff){
+    startShowingOff();
+    enableShowOffMode();
+    goToSleep();
+    return;
+  }
+ }
  
  /*find out how long the button has been clicked down for*/
  int delayTime = millis();
- while(digitalRead(BUTTON_PIN) == HIGH);
+ while(digitalRead(4) == HIGH);
  delayTime = millis() - delayTime;
 
- if(delayTime <300){// if the button has been clicked for less than 300 ms
+ if(delayTime <100){// if the button has been clicked for less than 300 ms
     readRTC();
     showTime(currentHours,currentMinutes, GLOW_FRAMES); //show the currentTime
  }
- else if(delayTime >=300 && delayTime <2000){ //if the button has been pressed for more than 300 ms then get ready to change the time
+ else if(delayTime >=100 && delayTime <300){ //if the button has been pressed for more than 300 ms then get ready to change the time
     configureTime();
  }
- else if(delayTime >= 2000){ //change to showoff mode
-    enableShowOffMode();
+ else if(delayTime >= 1000){ //change to showoff mode
+    if(!showOff)
+      enableShowOffMode();
+    else
+      disableShowOffMode();
  }
+ 
  attachInterrupt(digitalPinToInterrupt(INTERRUPT_PIN),buttonPressed,RISING); 
+ if(showOff)
+  WDTCSR |= (1<<6);//enable interrupt mode 
  goToSleep();
+}
+
+void startShowingOff(){
+  for(int i=0; i <5; i++){
+    (*showOff_ptrs[i])(i);
+    delay(1);
+    MCP23008_reset_all_pins();
+    set_IndicatorPins_INPUT();
+    set_MinPins_INPUT();
+  }
+  
 }
 
 void disableShowOffMode(){
   WDTCSR &= ~(1<<6);//disable interrupt mode
+  showOff = false;
 }
 
 void enableShowOffMode(){
   //SETUP WATCHDOG TIMER
+
+  
   WDTCSR = (24);//change enable and WDE - also resets
   WDTCSR = (33);//set the WDT to 8 seconds - get rid of the WDE and WDCE bit
   WDTCSR |= (1<<6);//enable interrupt mode
-  //showOff = true;
-  showOffInterval = random(DELAY_BETWEEN_SHOWOFF); // maximum time between showing is 5 minutes (37 * 8s ~= 300s)
+  showOff = true;
+  showOffInterval = 0;//random(DELAY_BETWEEN_SHOWOFF); // maximum time between showing is 5 minutes (37 * 8s ~= 300s)
 
   for(int i=0; i<5; i++)
     showOff_ptrs[i] = time_ptrs[random(NUMBER_OF_TIME_FUNCTIONS)];
@@ -351,4 +365,8 @@ int getAddrOfMinFunction(int m){
       break;
   }
   return addrOfMinFunction;
+}
+
+ISR(WDT_vect){
+  //required by the watch dog timer to wake up and move through the loop()
 }
