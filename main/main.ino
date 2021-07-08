@@ -68,28 +68,12 @@ void setup() {
   
   readRTC(); //update current hour and minute reading
 
-   if(digitalRead(3) == HIGH)
-    one_hour(0);
-  if(digitalRead(3) == LOW){
-     one_hour(1);
-  }
-  delay(100);
-  set_HourPins_INPUT();
-
-  //goToSleep(); //wait for interrupts
+  goToSleep(); //wait for interrupts
 }
 
 void loop() {
  //when interrupt occurs this is where the program begins
-
  
-  
-  
-  return;
-
-
-
-
  //determine source of interrupt 
 
  detachInterrupt(digitalPinToInterrupt(INTERRUPT_PIN)); //detach interrupt so that we don't cause an interrupt storm
@@ -127,14 +111,13 @@ void loop() {
  else if(delayTime >=100 && delayTime <300){ //if the button has been pressed for more than 300 ms then get ready to change the time
     configureTime();
  }
- else if(delayTime >= 1000){ //change to showoff mode
-    if(!showOff){
+ else if(delayTime > 300){ //change to showoff mode
+    if(!showOff)
       enableShowOffMode();
-      one_hour(1);
-      delay(100);
-    }else
+    else
       disableShowOffMode();
  }
+ 
  
  attachInterrupt(digitalPinToInterrupt(INTERRUPT_PIN),buttonPressed,RISING); 
  if(showOff) // if we're still in showOff mode then enable the WDT interrupts, incase we disabled them earlier.
@@ -187,7 +170,7 @@ void configureTime(){
     
     currentMinutes = roundMin(currentMinutes); //convert from the precice time told by the RTC to a time the watch can display
     while(timeConfig){
-      showTime(currentHours, currentMinutes, CONFIG_GLOW_FRAMES); //flash the time
+      showTime(currentHours, currentMinutes, CONFIG_GLOW_FRAMES); //flash the time 
       if(digitalRead(BUTTON_PIN) == HIGH){
         
         /*figure out how long the button is held down for*/
@@ -407,5 +390,4 @@ int getAddrOfMinFunction(int m){
 }
 
 ISR(WDT_vect){
-  set_HourPins_INPUT();
 }
