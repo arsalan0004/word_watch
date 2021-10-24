@@ -20,3 +20,5 @@ The Word watch is a sleek wristwatch that spells out the time for you – and a 
  Now you can simply click the main button to increment the time.
  Once you are satisfied with the time setting, hold the main button down for two seconds to return to the default mode.
  You can now tap the button at anytime to show the time.
+
+![render of close up of the glass screen](https://github.com/arsalan0004/word_watch/blob/master/photos/glass.png)
