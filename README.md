@@ -24,7 +24,6 @@
  You can now tap the button at anytime to show the time.
 
 ## Engineering Considerations
-#### Screen Development
 
 ![render of close up of the glass screen](https://github.com/arsalan0004/word_watch/blob/master/photos/glass.png)
 
