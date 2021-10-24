@@ -2,7 +2,7 @@
 
 ![Picture of a computer rentering of the word watch](https://github.com/arsalan0004/word_watch/blob/master/photos/final_jpeg.jpg)
 
-####Overview
+#Overview
 The Word watch is a sleek wristwatch that spells out the time for you – and a bit more.
 
 **Lightning mode** Designed for networking. hold the main button down for five seconds to activate lightning mode. While in this mode,
