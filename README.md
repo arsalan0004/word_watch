@@ -1,9 +1,11 @@
-#The Word Watch
-
+## The Word Watch
 ![Picture of a computer rentering of the word watch](https://github.com/arsalan0004/word_watch/blob/master/photos/final_jpeg.jpg)
 
-Overview
-The Word watch is a sleek wristwatch that spells out the time for you – and a bit more.
+### A sleek wristwatch that spells out the time for you – and a bit more.
+
+#### Featured Features
+---------------------------------------------------------------
+
 
 **Lightning mode** Designed for networking. hold the main button down for five seconds to activate lightning mode. While in this mode,
  the watch waits a random amount of time (1-5 minutes) before Lighting up a cascade of letters in such a way that it looks like lightning raced
@@ -21,8 +23,8 @@ The Word watch is a sleek wristwatch that spells out the time for you – and a 
  Once you are satisfied with the time setting, hold the main button down for two seconds to return to the default mode.
  You can now tap the button at anytime to show the time.
 
-#Engineering Considerations
--Screen Development
+## Engineering Considerations
+#### Screen Development
 
 ![render of close up of the glass screen](https://github.com/arsalan0004/word_watch/blob/master/photos/glass.png)
 
@@ -43,3 +45,28 @@ otherwise it will not pour nicely into the letter holes in the screen.
  The Blinds are the square compartments of a 3mm square mesh that was 3D printed and sandwiched between the circuit board and the screen.
  The height of the mesh is slightly greater than the maximum height of the LEDs and lays flush on the bottom side of the screen,
  ensuring that the light from an LED cannot reach it’s neighboring LED’s letter. 
+
+#### Circuitboard Development
+Designed using Eagle Cad
+
+**Charlieplexing** is a way of controlling 2(n+1) LEDs using n pins. This can be accomplished  because microcontroller pins can go into a high-impedance mode where the resistance is effectively infinite. By putting some pins in high impedance mode, its possible to route current along a network of LEDs such that only a single LED is turned on. This technique was used to decrease the cost of this design. Because this design uses 10x LEDs, a conventional approach to controlling these LEDs (through multiplexing) would cost tens of dollars per unit. 
+	
+Modularized Charlieplexing in addition to charlieplexing to save on costs, this design also
+Modularizes the charlieplex networks so that one network contains the ‘hour’           functions, another network holds the minute functions, and so on. This is because a charlieplex network can only have one LED on at a time, and so, to simultaneously turn on the minutes and hour LEDs, they need to be in different networks. 
+
+<picture of different networks>
+
+**RTC clock** running on custom library This design utilizes a ultra-low power RTC unit that  operates at x mA per hour. This unit is used to keep track of the time, with a greater accuracy than is possible with the native clock circuit in the microcontroller. Since the microcontroller is not used to keep time, it can go into a deep-sleep mode that reduces power consumption by roughly XX percent. Finally, the RTC also provides interrupts that allow lightning mode to work.  
+ 
+ 
+#### Software 
+
+ **Minimalistic drivers** were created for peripheral modules to replace generic drivers provided by arduino, because those drivers are made for families of peripherals,and so take up a lot of space. 
+
+**Minimalistic RTC library** A minimalistic library was coded to control the RTC. This library 
+                                             Includes functions for communicating with the RTC using I2C. These Functions include RTC_init() and change_time().
+
+**Minimalistic IO Expander Library** a minimalistic library was coded to control the MCP2008 IO
+		                  Expansion module. This library includes functions for 
+                                               Communication using I2C.
+
