@@ -2,7 +2,7 @@
 
 ![Picture of a computer rentering of the word watch](https://github.com/arsalan0004/word_watch/blob/master/photos/final_jpeg.jpg)
 
-#Overview
+Overview
 The Word watch is a sleek wristwatch that spells out the time for you – and a bit more.
 
 **Lightning mode** Designed for networking. hold the main button down for five seconds to activate lightning mode. While in this mode,
@@ -21,4 +21,25 @@ The Word watch is a sleek wristwatch that spells out the time for you – and a 
  Once you are satisfied with the time setting, hold the main button down for two seconds to return to the default mode.
  You can now tap the button at anytime to show the time.
 
+#Engineering Considerations
+-Screen Development
+
 ![render of close up of the glass screen](https://github.com/arsalan0004/word_watch/blob/master/photos/glass.png)
+
+**Waterproofing the screen** The screen is laser cut from a 3mm thin piece of plywood. Since it has holes in it that lead straight to the circuit board,
+ it needs to be waterproofed. To accomplish this, an epoxy resin is used. This resin needs to have an extremely low viscosity(similar to water) 
+otherwise it will not pour nicely into the letter holes in the screen.
+ Furthermore, all epoxies need to be degassed to produce crystal clear results upon hardening.
+ Degassing cannot be done with heat for this design because it will cause the wood to degas- releasing gasses into the epoxy,
+ which bubble up and obscure the light coming through the letter holes. Therefore, degassing must be done in a pressure chamber 
+(positive or negative pressure above 30 PSI works perfectly) 
+  
+**neodymium magnets** twelve tiny (2mm h x 1 mm d ) cylindrical magnets were used to hold the screen onto the rest of the watch body.
+ This was because the addition of screws (which adds a theme of ruggedness and complexity) would have ruined the design of the watch,
+ which is meant to appear elegant and minimalistic.  Furthermore, tiny screw holes are impossible to model with FLA 3D printing.
+ These screen magnets pair with a matching set of magnets built into the body of the watch
+
+**Blinds** Blinds were produced to enclose every single LED on the circuit board, ensuring that light would not leak from an LED into an adjacent letter.
+ The Blinds are the square compartments of a 3mm square mesh that was 3D printed and sandwiched between the circuit board and the screen.
+ The height of the mesh is slightly greater than the maximum height of the LEDs and lays flush on the bottom side of the screen,
+ ensuring that the light from an LED cannot reach it’s neighboring LED’s letter. 
