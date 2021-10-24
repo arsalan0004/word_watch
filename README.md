@@ -43,6 +43,7 @@ otherwise it will not pour nicely into the letter holes in the screen.
  ensuring that the light from an LED cannot reach it’s neighboring LED’s letter. 
 
 #### Circuitboard Development
+![](https://github.com/arsalan0004/word_watch/blob/master/photos/circuitboard.png)
 Designed using Eagle Cad
 
 **Charlieplexing** is a way of controlling 2(n+1) LEDs using n pins. This can be accomplished  because microcontroller pins can go into a high-impedance mode where the resistance is effectively infinite. By putting some pins in high impedance mode, its possible to route current along a network of LEDs such that only a single LED is turned on. This technique was used to decrease the cost of this design. Because this design uses 10x LEDs, a conventional approach to controlling these LEDs (through multiplexing) would cost tens of dollars per unit. 
