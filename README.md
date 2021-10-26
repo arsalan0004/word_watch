@@ -1,8 +1,7 @@
 
 ![Picture of a computer rentering of the word watch](https://github.com/arsalan0004/word_watch/blob/master/photos/final_jpeg.jpg)
 
-#### Featured Features
----------------------------------------------------------------
+## Featured Features
 
 **Lightning mode** Designed for networking. hold the main button down for five seconds to activate lightning mode. While in this mode,
  the watch waits a random amount of time (1-5 minutes) before Lighting up a cascade of letters in such a way that it looks like lightning raced
@@ -20,7 +19,7 @@
  Once you are satisfied with the time setting, hold the main button down for two seconds to return to the default mode.
  You can now tap the button at anytime to show the time.
 
-## Engineering Considerations
+## Screen Development
 
 ![render of close up of the glass screen](https://github.com/arsalan0004/word_watch/blob/master/photos/glass.png)
 
@@ -42,7 +41,7 @@ otherwise it will not pour nicely into the letter holes in the screen.
  The height of the mesh is slightly greater than the maximum height of the LEDs and lays flush on the bottom side of the screen,
  ensuring that the light from an LED cannot reach it’s neighboring LED’s letter. 
 
-#### Circuitboard Development
+## Circuitboard Development
 ![](https://github.com/arsalan0004/word_watch/blob/master/photos/circuitboard.png)
 Designed using Eagle Cad
 
@@ -56,7 +55,7 @@ Modularizes the charlieplex networks so that one network contains the ‘hour’
 **RTC clock** running on custom library This design utilizes a ultra-low power RTC unit that  operates at x mA per hour. This unit is used to keep track of the time, with a greater accuracy than is possible with the native clock circuit in the microcontroller. Since the microcontroller is not used to keep time, it can go into a deep-sleep mode that reduces power consumption by roughly XX percent. Finally, the RTC also provides interrupts that allow lightning mode to work.  
  
  
-#### Software 
+## Software Development 
 
  **Minimalistic drivers** were created for peripheral modules to replace generic drivers provided by arduino, because those drivers are made for families of peripherals,and so take up a lot of space. 
 
