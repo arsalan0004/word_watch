@@ -20,7 +20,7 @@ All the LEDs associated with spelling out minutes are controlled by the ATMEGA32
 #define MIN6 5//PD5
 
 
-void set_MinPins_INPUT(){
+void set_minp_ins_INPUT(){
   pinMode(MIN1, INPUT);
   pinMode(MIN2, INPUT);
   pinMode(MIN3, INPUT);
@@ -30,7 +30,7 @@ void set_MinPins_INPUT(){
   pinMode(MIN6, INPUT);
 }
 
-void five_Minutes(int i){
+void five_minutes(int i){
   //involves pins 'min3' and 'min5'
   pinMode(MIN3, OUTPUT); pinMode(MIN5, OUTPUT);
    i = i%2;
@@ -45,7 +45,7 @@ void five_Minutes(int i){
   }
 }
 
-void ten_Minutes(int i){
+void ten_minutes(int i){
   //involves pins 'min2' and 'min3' and 'min6'
   pinMode(MIN6, OUTPUT);
   
@@ -68,7 +68,7 @@ void ten_Minutes(int i){
   
 }
 
-void fifteen_Minutes(int i){
+void fifteen_minutes(int i){
   //lights up 'quarter' as in 'quarter past five'
   //involves pins 'min1', 'min2', and 'min6'
 
@@ -103,7 +103,7 @@ void fifteen_Minutes(int i){
   
 }
 
-void twenty_Minutes(int i){
+void twenty_minutes(int i){
   //involves pins 'min1' and 'min2' and 'min5'
   
   pinMode(MIN5, OUTPUT);
@@ -133,7 +133,7 @@ void twenty_Minutes(int i){
   
 }
 
-void twentyFive_Minutes(int i){
+void twentyfive_minutes(int i){
   //involves pins 'Min1', 'Min2','Min3' and 'Min5'
   pinMode(MIN5, OUTPUT);
 
@@ -157,7 +157,7 @@ void twentyFive_Minutes(int i){
   }
 }
 
-void thirty_Minutes(int i){
+void thirty_minutes(int i){
   //lights up 'half', as in, 'half past three'
   //involves pins 'Min3' and 'Min4'
   pinMode(MIN3, OUTPUT); pinMode(MIN4, OUTPUT);

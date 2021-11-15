@@ -1,19 +1,17 @@
 /*
 Title: Hour_Functions
 Creator: Arsalan Syed
-libraries required: Wire.c 
-Last Update: Jan 21st, 2021, by Arsalan Syed
+libraries required: Wire.c
 
 Description:
 This file is part of the Word-Watch V2 project.
-This file contains all the functions which are called to glow the letters associated with hours.
-All the LEDs associated with spelling out hours are controlled by the MCP23008 I/O expander, which is controlled through I2C. 
-
-
-//mistake on schematic. Hour 2 trace to E and N2 of 'Nine' needs to be cut. trace from hour3 needs to be rerouted here
+This file contains all the functions which are called to glow the letters 
+associated with hours. All the LEDs associated with spelling out hours are 
+controlled by the MCP23008 I/O expander, which is controlled through I2C. 
 */
 
 #include "Wire.h"
+#include "hour_functions.h"
 
 #define MCP23008_ADDRESS 0x20
 #define MCP23008_GPIO_REG 0x09
@@ -31,22 +29,28 @@ All the LEDs associated with spelling out hours are controlled by the MCP23008 I
 
 
 void MCP23008_setPinAsOutput(uint8_t pin1, uint8_t pin2){
-  //sets pins specified with a '1' as output, and those specified with a '0' as input 
-  //example: byte pins = 0b00000001 sets pins 1-7 to input, and pin 0 as output
+  /*sets pins specified with a '1' as output, and those specified with a '0' 
+  as input example: byte pins = 0b00000001 sets pins 1-7 to input, and pin 0 
+  as output */
 
  
   
   byte pins = ~(pin1 | pin2);
-  //inverts the pins because the MCP23008 harware actually requires that output pins be specified by '0'
-  //and input pins specified by  '1'
-  //our method uses the inverse because it allows us to be consistant with our methods to 
-  //set pins as output and then set them as High.
-  //example of our methodology : MCP23008_setPinAsOutput(HOUR1) sets the pin associated with HOUR1 as output 
-  //                             MCP23008_set(HOUR1) sets the pin associated with HOUR1 high.  
+  // inverts the pins because the MCP23008 harware actually requires that output
+  // pins be specified by '0' and input pins specified by  '1'
+  // our method uses the inverse because it allows us to be consistant with our 
+  // methods to set pins as output and then set them as High.
 
-  //wheras if we did not invert 'byte pins' we would have to do this:
-  //example of our methodology : MCP23008_setPinAsOutput(~HOUR1) sets the pin associated with HOUR1 as output 
-  //                             MCP23008_set(HOUR1) sets the pin associated with HOUR1 high.  
+  /*example of our methodology : MCP23008_setPinAsOutput(HOUR1) sets the pin 
+                                 associated with HOUR1 as output 
+                                 MCP23008_set(HOUR1) sets the pin associated 
+                                 with HOUR1 high.  */
+
+  /* wheras if we did not invert 'byte pins' we would have to do this:
+    example of our methodology : MCP23008_setPinAsOutput(~HOUR1) sets the pin 
+                                 associated with HOUR1 as output 
+                                 MCP23008_set(HOUR1) sets the pin associated 
+                                 with HOUR1 high.  */
 
   
   Wire.beginTransmission(MCP23008_ADDRESS);
@@ -58,22 +62,19 @@ void MCP23008_setPinAsOutput(uint8_t pin1, uint8_t pin2){
 
 
 void MCP23008_set(uint8_t input){
-  //sets the MCP23008 pins specificed by the byte inputted.
-  //Because this function 'touches' every bit in the GPIO register, you don't always need to manually set pins low.
-  //example: input byte: 00000001 sets pin 0, and clears pins 7-1.
-  //         input byte: 00000010 sets pin 0 low (along with pins 7-2) but sets pin 1
+  
   
   Wire.beginTransmission(MCP23008_ADDRESS);
-  Wire.write(MCP23008_GPIO_REG);              //access address for GPIO access
-  Wire.write(input);                           //setting voltage. 1 = high, 0 = low 
+  Wire.write(MCP23008_GPIO_REG);            //access address for GPIO access
+  Wire.write(input);                        //setting voltage. 1 = high, 0 = low 
   Wire.endTransmission();
   
 }
 
 void MCP23008_reset_all_pins(){
   Wire.beginTransmission(MCP23008_ADDRESS);
-  Wire.write(MCP23008_GPIO_REG);              //access address for GPIO access
-  Wire.write((uint8_t)0x00);                           //setting voltage. 1 = high, 0 = low 
+  Wire.write(MCP23008_GPIO_REG);           //access address for GPIO access
+  Wire.write((uint8_t)0x00);               //setting voltage. 1 = high, 0 = low 
   Wire.endTransmission();
 }
 
