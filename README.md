@@ -45,24 +45,18 @@ otherwise it will not pour nicely into the letter holes in the screen.
 ![](https://github.com/arsalan0004/word_watch/blob/master/photos/circuitboard.png)
 Designed using Eagle Cad
 
-**Charlieplexing** is a way of controlling 2(n+1) LEDs using n pins. This can be accomplished  because microcontroller pins can go into a high-impedance mode where the resistance is effectively infinite. By putting some pins in high impedance mode, its possible to route current along a network of LEDs such that only a single LED is turned on. This technique was used to decrease the cost of this design. Because this design uses 10x LEDs, a conventional approach to controlling these LEDs (through multiplexing) would cost tens of dollars per unit. 
+**Charlieplexing** was used to decrease manufacutiring costs. This board has over a hundred LEDs, which need to be individually controlled. Conventionally, this would require atleast a hundred pins. By using charlieplexing, the required number of pins was decreased to 28. Charlieplexing is a method for controlling 2(n+1) LEDs using n pins. This can be accomplished because microcontroller pins can go into a high-impedance mode where the input resistance is effectively infinite. By putting some pins in high impedance mode, its possible to route current along a network of LEDs such that only a single LED is turned on.
 	
-Modularized Charlieplexing in addition to charlieplexing to save on costs, this design also
-Modularizes the charlieplex networks so that one network contains the ‘hour’           functions, another network holds the minute functions, and so on. This is because a charlieplex network can only have one LED on at a time, and so, to simultaneously turn on the minutes and hour LEDs, they need to be in different networks. 
+**Modularized Charlieplexing** One major problem with the use of charliplexing for this design is that only a single LED within a charliplex network can be turned at any given time. Given that this design must light up long phrases like 'It is half past twelve', lighting each letter after another would produce a flickering display. Therefore, instead of networking all the LEDs together into one network, all the LEDs are networked into groups of phrases that are mutually exclusive. For example, 'one', 'two', 'three' ....'twelve' are all grouped plexed together into an 'hour' network because 'two' will never lightup when 'four' does. Similarily 'oclock', 'past' and 'to' form an 'indicator' group. Since 'two' and 'oclock' are in different charliplexes, the system can cycle through turning on the LEDs associated with 'two' and 'oclock' at the same time. That is to say, two LEDs can be turned on at the same time. This eliminates flickering.
 
-<picture of different networks>
 
-**RTC clock** running on custom library This design utilizes a ultra-low power RTC unit that  operates at x mA per hour. This unit is used to keep track of the time, with a greater accuracy than is possible with the native clock circuit in the microcontroller. Since the microcontroller is not used to keep time, it can go into a deep-sleep mode that reduces power consumption by roughly XX percent. Finally, the RTC also provides interrupts that allow lightning mode to work.  
+**External RTC clock** running on a custom library, this design utilizes a ultra-low power RTC unit to improve accuracy and save power. The  unit is used to keep track of the time, with a greater accuracy than is possible with the native clock circuit in the microcontroller. Since the microcontroller is not used to keep time, it can go into a deep-sleep mode that reduces power consumption by more than 99.99 percent. Finally, the RTC also provides interrupts that allow lightning mode to work. 
  
  
 ## Software Development 
 
- **Minimalistic drivers** were created for peripheral modules to replace generic drivers provided by arduino, because those drivers are made for families of peripherals,and so take up a lot of space. 
 
-**Minimalistic RTC library** A minimalistic library was coded to control the RTC. This library 
-                                             Includes functions for communicating with the RTC using I2C. These Functions include RTC_init() and change_time().
+**Minimalistic RTC library** A minimalistic library was coded to control the RTC. This library includes functions for communicating with the RTC using I2C. These Functions include RTC_init() and change_time(). 
 
-**Minimalistic IO Expander Library** a minimalistic library was coded to control the MCP2008 IO
-		                  Expansion module. This library includes functions for 
-                                               Communication using I2C.
+**Minimalistic IO Expander Library** a minimalistic library was coded to control the MCP2008 IO Expansion module. This library includes functions for communication using I2C.
 
