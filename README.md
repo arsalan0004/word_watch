@@ -43,7 +43,6 @@ otherwise it will not pour nicely into the letter holes in the screen.
 
 ## Circuitboard Development
 ![](https://github.com/arsalan0004/word_watch/blob/master/photos/circuitboard.png)
-Designed using Eagle Cad
 
 **Charlieplexing** was used to decrease manufacutiring costs. This board has over a hundred LEDs, which need to be individually controlled. Conventionally, this would require atleast a hundred pins. By using charlieplexing, the required number of pins was decreased to 28. Charlieplexing is a method for controlling 2(n+1) LEDs using n pins. This can be accomplished because microcontroller pins can go into a high-impedance mode where the input resistance is effectively infinite. By putting some pins in high impedance mode, its possible to route current along a network of LEDs such that only a single LED is turned on.
 	
